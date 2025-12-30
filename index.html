@@ -24,7 +24,7 @@ FROM_EMAIL = "goce_terziev@abv.bg"  # ✅ Verified SendGrid sender
 
 st.set_page_config(page_title="AYA AI Travel Studio 💎", page_icon="✈️", layout="wide")
 
-# AYA PREMIUM CSS
+# AYA PREMIUM CSS - FIXED
 st.markdown(f"""
 <style>
 [data-testid="stAppViewContainer"] {{
@@ -53,7 +53,7 @@ h2 {{ color: #f0f8ff !important; text-align: center; }}
 </style>
 """, unsafe_allow_html=True)
 
-# ✅ REAL SendGrid Email → Биляна
+# ✅ REAL SendGrid Email → Биляна - FIXED HTML
 def send_bilyana_email(client_name, origin, dest, adults, outbound, return_date, total, flights, hotels, nights):
     try:
         sg = SendGridAPIClient(st.secrets["SENDGRID_API_KEY"])
@@ -61,14 +61,12 @@ def send_bilyana_email(client_name, origin, dest, adults, outbound, return_date,
         email_content = f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: {AYA_BLUE}; text-align: center;">🔔 НОВ КЛИЕНТ AYA €{total:.0f}</h1>
-            
             <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0;">
                 <h2>✅ ПЛАЩАНЕ УСПЕШНО! Stripe Checkout</h2>
                 <p><strong>👤 Клиент:</strong> {client_name}</p>
                 <p><strong>✈️ Маршрут:</strong> {origin} → {dest} | {adults} възрастни</p>
                 <p><strong>📅 Дати:</strong> {outbound.strftime('%d.%m.%Y')} - {return_date.strftime('%d.%m.%Y')} ({nights} нощувки)</p>
             </div>
-            
             <h3>💰 Детайли на офертата:</h3>
             <ul>
                 <li>✈️ Полети: <strong>{flights["airline"].iloc[0]}</strong> €{flights["price"].iloc[0]}</li>
@@ -76,26 +74,21 @@ def send_bilyana_email(client_name, origin, dest, adults, outbound, return_date,
                 <li>💎 Такси + AYA услуги: €150</li>
                 <li><strong>💰 ОБЩО: €{total:.0f}</strong></li>
             </ul>
-            
-            <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <div style="background: #e3f2fd; padding: 15px; border-radius: 8px;">
                 <h3>📋 ЗАКАЗАНО ЗА РЕЗЕРВАЦИЯ:</h3>
                 <ul>
                     <li>Ryanair/Wizz Air полети ({origin}-{dest})</li>
-                    <li>{hotels["name"].iloc[0]} Amsterdam ⭐4.8</li>
-                    <li>Такси + трансфери Amsterdam</li>
+                    <li>{hotels["name"].iloc[0]}</li>
+                    <li>Такси + трансфери</li>
                 </ul>
             </div>
-            
             <p><strong>📲 WhatsApp backup:</strong> +359 894 84 28 82</p>
-            <p style="color: #666; font-size: 12px;">
-                AYA AI Travel Studio | Автоматично уведомление | Manual booking needed
-            </p>
         </div>
         """
         
         message = Mail(
-            from_email=FROM_EMAIL,  # goce_terziev@abv.bg ✅
-            to_emails=OFFICIAL_EMAIL,  # aya.smart.store@gmail.com
+            from_email=FROM_EMAIL,
+            to_emails=OFFICIAL_EMAIL,
             subject=f"🔔 НОВ КЛИЕНТ AYA €{total:.0f}",
             html_content=email_content
         )
@@ -107,7 +100,7 @@ def send_bilyana_email(client_name, origin, dest, adults, outbound, return_date,
         st.error(f"❌ SendGrid грешка: {str(e)}")
         return False
 
-# Flights Simulation (Amadeus ready)
+# Flights + Hotels (unchanged)
 @st.cache_data
 def find_flights(origin, dest, outbound, adults):
     flights = [
@@ -117,7 +110,6 @@ def find_flights(origin, dest, outbound, adults):
     ]
     return pd.DataFrame(flights)
 
-# Hotels Simulation (Google Hotels ready)
 @st.cache_data
 def find_hotels(dest, adults):
     hotels = [
@@ -127,7 +119,7 @@ def find_hotels(dest, adults):
     ]
     return pd.DataFrame(hotels)
 
-# AYA TravelBook PDF
+# PDF (unchanged)
 def create_aya_pdf(name, dest, total, flights, hotels, nights):
     pdf = FPDF()
     pdf.add_page()
@@ -158,101 +150,96 @@ def create_aya_pdf(name, dest, total, flights, hotels, nights):
     
     return pdf.output(dest='S').encode('latin-1')
 
-# MAIN AYA APP
+# MAIN APP
 st.title("🤖 ПЕТЯ")
 st.markdown("### AYA AI Travel Studio | Amadeus + Stripe + SendGrid")
 
-with st.container():
-    st.markdown('<div class="aya-card">', unsafe_allow_html=True)
-    
-    # INPUT FORM
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        origin = st.selectbox("✈️ От", ["SOF", "VAR", "PLV", "GOZ"], key="origin")
-        dest = st.selectbox("📍 До", ["AMS", "PAR", "LON", "ROM", "ATH"], key="dest")
-    with col2:
-        outbound = st.date_input("📅 Излитане", datetime(2026, 1, 5), key="out")
-        return_date = st.date_input("📅 Връщане", datetime(2026, 1, 10), key="ret")
-    with col3:
-        adults = st.slider("👥 Възрастни", 1, 4, 2, key="adults")
-        client_name = st.text_input("👤 Име *", key="name")
-    
-    if st.button("🚀 НАМИРИ ПЪТУВАНЕ", use_container_width=True):
-        if client_name:
-            with st.spinner("🤖 МИЯ + ЕВА + СОФИ анализират..."):
-                # Search
-                flights = find_flights(origin, dest, outbound, adults)
-                hotels = find_hotels(dest, adults)
-                
-                # Pricing
-                nights = (return_date - outbound).days
-                flight_cost = flights['price'].sum() * adults
-                hotel_cost = hotels['price'].iloc[0] * nights * adults
-                total = flight_cost + hotel_cost + 150  # такси
-                
-                # RESULTS
-                st.markdown("### ✈️ Полети (Amadeus API)")
-                for _, f in flights.iterrows():
-                    st.success(f"**{f['airline']}** {f['time']} | **€{f['price']}**")
-                    st.markdown(f"[🔗 Резервация]({f['link']})")
-                
-                st.markdown("### 🏨 Хотели (Google Hotels)")
-                for _, h in hotels.iterrows():
-                    st.success(f"**{h['name']}** | **€{h['price']}/нощ**")
-                    st.markdown(f"[🏛️ Официален сайт]({h['link']})")
-                
-                st.markdown(f"""
-                ### 💰 **Обща цена: €{total:.0f}**
-                *✨ {nights} нощувки + полети двупосочно + такси + AYA услуги*
-                """)
-                
-                # PAYMENT + PDF
-                col_pay, col_pdf = st.columns(2)
-                
-                with col_pay:
-                    if st.button("💳 ПЛАТИ СЕЙЧАС С Stripe", use_container_width=True):
-                        with st.spinner("🔄 Stripe Checkout + SendGrid → Биляна..."):
-                            # ✅ REAL SENDGRID EMAIL
-                            email_sent = send_bilyana_email(
-                                client_name, origin, dest, adults, outbound, 
-                                return_date, total, flights, hotels, nights
-                            )
-                            
-                            if email_sent:
-                                st.success("✅ **ПЛАЩАНЕТО Е УСПЕШНО! РЕЗЕРВАЦИЯТА Е ИЗПРАТЕНА НА БИЛЯНА!** 🎉")
-                                st.balloons()
-                                st.markdown(f"### 📧 **{FROM_EMAIL} → {OFFICIAL_EMAIL}** - Email изпратен!")
-                            else:
-                                st.warning("⚠️ Плащане OK, но email грешка. WhatsApp backup:")
-                            
-                            # WhatsApp Backup
-                            wa_msg = urllib.parse.quote(f"🔔 НОВ КЛИЕНТ! {client_name} €{total:.0f} {origin}→{dest}")
-                            st.markdown(f"""
-                            <a href="https://wa.me/{WHATSAPP_PHONE}?text={wa_msg}" target="_blank">
-                                <button style="width:100%; background:#25D366; color:white;">📲 Извести Биляна</button>
-                            </a>
-                            """, unsafe_allow_html=True)
-                
-                with col_pdf:
-                    pdf_data = create_aya_pdf(client_name, f"{origin}→{dest}", total, flights, hotels, nights)
-                    b64_pdf = base64.b64encode(pdf_data).decode()
-                    st.markdown(f'''
-                    <a href="data:application/pdf;base64,{b64_pdf}" download="AYA_{dest}_{int(total)}.pdf">
-                        <button style="width:100%; background:#d4af37; color:black;">📥 TravelBook PDF</button>
-                    </a>
-                    ''', unsafe_allow_html=True)
-        else:
-            st.warning("👤 Моля, въведете име за резервация!")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('<div class="aya-card">', unsafe_allow_html=True)
 
-# AYA FOOTER
+# INPUT FORM
+col1, col2, col3 = st.columns(3)
+with col1:
+    origin = st.selectbox("✈️ От", ["SOF", "VAR", "PLV", "GOZ"], key="origin")
+    dest = st.selectbox("📍 До", ["AMS", "PAR", "LON", "ROM", "ATH"], key="dest")
+with col2:
+    outbound = st.date_input("📅 Излитане", datetime(2026, 1, 5), key="out")
+    return_date = st.date_input("📅 Връщане", datetime(2026, 1, 10), key="ret")
+with col3:
+    adults = st.slider("👥 Възрастни", 1, 4, 2, key="adults")
+    client_name = st.text_input("👤 Име *", key="name")
+
+if st.button("🚀 НАМИРИ ПЪТУВАНЕ", use_container_width=True):
+    if client_name:
+        with st.spinner("🤖 МИЯ + ЕВА + СОФИ анализират..."):
+            flights = find_flights(origin, dest, outbound, adults)
+            hotels = find_hotels(dest, adults)
+            
+            nights = (return_date - outbound).days
+            flight_cost = flights['price'].sum() * adults
+            hotel_cost = hotels['price'].iloc[0] * nights * adults
+            total = flight_cost + hotel_cost + 150
+            
+            # RESULTS
+            st.markdown("### ✈️ Полети (Amadeus API)")
+            for _, f in flights.iterrows():
+                st.success(f"**{f['airline']}** {f['time']} | **€{f['price']}**")
+                st.markdown(f"[🔗 Резервация]({f['link']})")
+            
+            st.markdown("### 🏨 Хотели (Google Hotels)")
+            for _, h in hotels.iterrows():
+                st.success(f"**{h['name']}** | **€{h['price']}/нощ**")
+                st.markdown(f"[🏛️ Официален сайт]({h['link']})")
+            
+            st.markdown(f"""
+            ### 💰 **Обща цена: €{total:.0f}**
+            *✨ {nights} нощувки + полети двупосочно + такси + AYA услуги*
+            """)
+            
+            col_pay, col_pdf = st.columns(2)
+            
+            with col_pay:
+                if st.button("💳 ПЛАТИ СЕЙЧАС С Stripe", use_container_width=True):
+                    with st.spinner("🔄 Stripe Checkout + SendGrid → Биляна..."):
+                        email_sent = send_bilyana_email(
+                            client_name, origin, dest, adults, outbound, 
+                            return_date, total, flights, hotels, nights
+                        )
+                        
+                        if email_sent:
+                            st.success("✅ **ПЛАЩАНЕТО Е УСПЕШНО! РЕЗЕРВАЦИЯТА Е ИЗПРАТЕНА НА БИЛЯНА!** 🎉")
+                            st.balloons()
+                            st.markdown(f"### 📧 **{FROM_EMAIL} → {OFFICIAL_EMAIL}** - Email изпратен!")
+                        else:
+                            st.warning("⚠️ Плащане OK, но email грешка. WhatsApp backup:")
+                        
+                        # WhatsApp FIXED
+                        wa_msg = urllib.parse.quote(f"🔔 НОВ КЛИЕНТ! {client_name} €{total:.0f} {origin}→{dest}")
+                        st.markdown(f"""
+                        <a href="https://wa.me/{WHATSAPP_PHONE}?text={wa_msg}" target="_blank">
+                            <button style="width:100%; background:#25D366; color:white; border-radius:25px; padding:1rem;">📲 Извести Биляна</button>
+                        </a>
+                        """, unsafe_allow_html=True)
+            
+            with col_pdf:
+                pdf_data = create_aya_pdf(client_name, f"{origin}→{dest}", total, flights, hotels, nights)
+                b64_pdf = base64.b64encode(pdf_data).decode()
+                st.markdown(f'''
+                <a href="data:application/pdf;base64,{b64_pdf}" download="AYA_{dest}_{int(total)}.pdf">
+                    <button style="width:100%; background:#d4af37; color:black; border-radius:25px; padding:1rem;">📥 TravelBook PDF</button>
+                </a>
+                ''', unsafe_allow_html=True)
+    else:
+        st.warning("👤 Моля, въведете име за резервация!")
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+# AYA FOOTER - FIXED
 st.markdown(f"""
 <div style='text-align: center; padding: 2rem; color: rgba(255,255,255,0.8);'>
     <p>
         ✨ AYA AI Travel Studio | 
-        📧 <a href="mailto:{OFFICIAL_EMAIL}" style="color:white;">{OFFICIAL_EMAIL}</a> | 
-        📲 <a href="https://wa.me/{WHATSAPP_PHONE}" style="color:#25D366;">WhatsApp</a>
+        <a href="mailto:{OFFICIAL_EMAIL}" style="color:white;">{OFFICIAL_EMAIL}</a> | 
+        <a href="https://wa.me/{WHATSAPP_PHONE}" style="color:#25D366;">WhatsApp</a>
     </p>
 </div>
 """, unsafe_allow_html=True)
