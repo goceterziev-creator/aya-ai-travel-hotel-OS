@@ -1,6 +1,6 @@
 """
 AYA AI TRAVEL STUDIO - SENDGRID PRODUCTION VERSION
-✅ REAL SendGrid emails → aya.smart.store@gmail.com (Биляна)
+✅ REAL SendGrid: goce_terziev@abv.bg → aya.smart.store@gmail.com (Биляна)
 ✅ Stripe €2400 simulation + WhatsApp backup
 ✅ 1 клиент = €2400 → Биляна dashboard готов!
 """
@@ -11,16 +11,16 @@ from datetime import datetime
 import base64
 import urllib.parse
 from fpdf import FPDF
-import os
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
-# AYA OFFICIAL CONSTANTS [memory:1][memory:5]
+# AYA OFFICIAL CONSTANTS
 AYA_BLUE = "#00b4db"
 AYA_DARK = "#0083b0"
 CONTACT_NAME = "Биляна Билбилова Терзиева"
 WHATSAPP_PHONE = "359894842882"
-OFFICIAL_EMAIL = "aya.smart.store@gmail.com"  # Биляна email [web:19]
+OFFICIAL_EMAIL = "aya.smart.store@gmail.com"  # Биляна email
+FROM_EMAIL = "goce_terziev@abv.bg"  # ✅ Verified SendGrid sender
 
 st.set_page_config(page_title="AYA AI Travel Studio 💎", page_icon="✈️", layout="wide")
 
@@ -53,14 +53,11 @@ h2 {{ color: #f0f8ff !important; text-align: center; }}
 </style>
 """, unsafe_allow_html=True)
 
-# REAL SendGrid Email Function [web:19][web:22][web:25]
+# ✅ REAL SendGrid Email → Биляна
 def send_bilyana_email(client_name, origin, dest, adults, outbound, return_date, total, flights, hotels, nights):
     try:
-        sg = SendGridAPIClient(st.secrets["SENDGRID_API_KEY"])  # Streamlit Secrets [web:24]
-        from_email = "noreply@aya.travel"
-        to_email = OFFICIAL_EMAIL
+        sg = SendGridAPIClient(st.secrets["SENDGRID_API_KEY"])
         
-        # AYA Professional Email Template [conversation_history:9]
         email_content = f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: {AYA_BLUE}; text-align: center;">🔔 НОВ КЛИЕНТ AYA €{total:.0f}</h1>
@@ -97,8 +94,8 @@ def send_bilyana_email(client_name, origin, dest, adults, outbound, return_date,
         """
         
         message = Mail(
-            from_email=from_email,
-            to_emails=to_email,
+            from_email=FROM_EMAIL,  # goce_terziev@abv.bg ✅
+            to_emails=OFFICIAL_EMAIL,  # aya.smart.store@gmail.com
             subject=f"🔔 НОВ КЛИЕНТ AYA €{total:.0f}",
             html_content=email_content
         )
@@ -110,7 +107,7 @@ def send_bilyana_email(client_name, origin, dest, adults, outbound, return_date,
         st.error(f"❌ SendGrid грешка: {str(e)}")
         return False
 
-# Flights + Hotels (simulation → real APIs ready)
+# Flights Simulation (Amadeus ready)
 @st.cache_data
 def find_flights(origin, dest, outbound, adults):
     flights = [
@@ -120,6 +117,7 @@ def find_flights(origin, dest, outbound, adults):
     ]
     return pd.DataFrame(flights)
 
+# Hotels Simulation (Google Hotels ready)
 @st.cache_data
 def find_hotels(dest, adults):
     hotels = [
@@ -129,7 +127,7 @@ def find_hotels(dest, adults):
     ]
     return pd.DataFrame(hotels)
 
-# PDF TravelBook (unchanged)
+# AYA TravelBook PDF
 def create_aya_pdf(name, dest, total, flights, hotels, nights):
     pdf = FPDF()
     pdf.add_page()
@@ -160,13 +158,14 @@ def create_aya_pdf(name, dest, total, flights, hotels, nights):
     
     return pdf.output(dest='S').encode('latin-1')
 
-# MAIN APP
+# MAIN AYA APP
 st.title("🤖 ПЕТЯ")
 st.markdown("### AYA AI Travel Studio | Amadeus + Stripe + SendGrid")
 
 with st.container():
     st.markdown('<div class="aya-card">', unsafe_allow_html=True)
     
+    # INPUT FORM
     col1, col2, col3 = st.columns(3)
     with col1:
         origin = st.selectbox("✈️ От", ["SOF", "VAR", "PLV", "GOZ"], key="origin")
@@ -181,15 +180,17 @@ with st.container():
     if st.button("🚀 НАМИРИ ПЪТУВАНЕ", use_container_width=True):
         if client_name:
             with st.spinner("🤖 МИЯ + ЕВА + СОФИ анализират..."):
+                # Search
                 flights = find_flights(origin, dest, outbound, adults)
                 hotels = find_hotels(dest, adults)
                 
+                # Pricing
                 nights = (return_date - outbound).days
                 flight_cost = flights['price'].sum() * adults
                 hotel_cost = hotels['price'].iloc[0] * nights * adults
                 total = flight_cost + hotel_cost + 150  # такси
                 
-                # Results display (unchanged)
+                # RESULTS
                 st.markdown("### ✈️ Полети (Amadeus API)")
                 for _, f in flights.iterrows():
                     st.success(f"**{f['airline']}** {f['time']} | **€{f['price']}**")
@@ -205,12 +206,13 @@ with st.container():
                 *✨ {nights} нощувки + полети двупосочно + такси + AYA услуги*
                 """)
                 
+                # PAYMENT + PDF
                 col_pay, col_pdf = st.columns(2)
                 
                 with col_pay:
                     if st.button("💳 ПЛАТИ СЕЙЧАС С Stripe", use_container_width=True):
                         with st.spinner("🔄 Stripe Checkout + SendGrid → Биляна..."):
-                            # ✅ REAL SENDGRID TO БИЛЯНА [web:19]
+                            # ✅ REAL SENDGRID EMAIL
                             email_sent = send_bilyana_email(
                                 client_name, origin, dest, adults, outbound, 
                                 return_date, total, flights, hotels, nights
@@ -219,18 +221,15 @@ with st.container():
                             if email_sent:
                                 st.success("✅ **ПЛАЩАНЕТО Е УСПЕШНО! РЕЗЕРВАЦИЯТА Е ИЗПРАТЕНА НА БИЛЯНА!** 🎉")
                                 st.balloons()
-                                st.balloons()
-                                st.markdown(f"### 📧 **{OFFICIAL_EMAIL}** получи пълно уведомление!")
+                                st.markdown(f"### 📧 **{FROM_EMAIL} → {OFFICIAL_EMAIL}** - Email изпратен!")
                             else:
                                 st.warning("⚠️ Плащане OK, но email грешка. WhatsApp backup:")
                             
                             # WhatsApp Backup
                             wa_msg = urllib.parse.quote(f"🔔 НОВ КЛИЕНТ! {client_name} €{total:.0f} {origin}→{dest}")
                             st.markdown(f"""
-                            <a href="https://wa.me/{WHATSAPP_PHONE}?text={wa_msg}" target="_blank" style="text-decoration: none;">
-                                <button style="width:100%; background:#25D366; color:white; border-radius:25px; padding:1rem;">
-                                    📲 Извести Биляна WhatsApp
-                                </button>
+                            <a href="https://wa.me/{WHATSAPP_PHONE}?text={wa_msg}" target="_blank">
+                                <button style="width:100%; background:#25D366; color:white;">📲 Извести Биляна</button>
                             </a>
                             """, unsafe_allow_html=True)
                 
@@ -247,7 +246,7 @@ with st.container():
     
     st.markdown('</div>', unsafe_allow_html=True)
 
-# AYA Footer Update
+# AYA FOOTER
 st.markdown(f"""
 <div style='text-align: center; padding: 2rem; color: rgba(255,255,255,0.8);'>
     <p>
