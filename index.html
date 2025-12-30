@@ -1,27 +1,88 @@
-# Добави в началото на app_pro.py:
-OFFICIAL_EMAIL = "aya.smart.store@gmail.com"  # Биляна email
-
-# В simulation email секцията:
-email_content = f"""
-🔔 НОВ КЛИЕНТ! ПЛАТИ €{total:.0f}!
-
-👤 {client_name}
-✈️ {origin} → {dest} | {adults} adults
-📅 {outbound.strftime('%d.%m')} - {return_date.strftime('%d.%m')}
-
-💰 Ryanair €72 + Pulitzer €285 x{nights} = €{total:.0f}
-✅ Stripe Checkout успешен!
-
-📋 ЗАКАЗАНО:
-• Полети: Ryanair/Wizz Air (€72-€89)
-• Хотел: Pulitzer Amsterdam ⭐4.8 (€285/нощ)
-• Такси + трансфери
-
-📧 Отговор: aya.smart.store@gmail.com
-📲 WhatsApp: +359 894 84 28 82
-
-✅ Биляна - Manual резервация!
+"""
+AYA AI TRAVEL STUDIO - FINAL VERSION
+Stripe €2400 + Email aya.smart.store@gmail.com + WhatsApp Биляна
 """
 
-# WhatsApp линк с email:
-wa_msg = urllib.parse.quote(f"🔔 НОВ КЛИЕНТ! {client_name} €{total} {origin}→{dest} | {EMAIL}")
+import streamlit as st
+import pandas as pd
+from datetime import datetime
+import base64
+import urllib.parse
+from fpdf import FPDF
+
+# AYA OFFICIAL [file:67]
+AYA_BLUE = "#00b4db"
+AYA_DARK = "#0083b0"
+CONTACT_NAME = "Биляна Билбилова Терзиева"
+WHATSAPP_PHONE = "359894842882"
+OFFICIAL_EMAIL = "aya.smart.store@gmail.com"  # Биляна email
+
+st.set_page_config(page_title="AYA AI Travel Studio 💎", page_icon="✈️", layout="wide")
+
+# AYA PREMIUM CSS
+st.markdown(f"""
+<style>
+[data-testid="stAppViewContainer"] {{
+    background: linear-gradient(135deg, {AYA_BLUE} 0%, {AYA_DARK} 100%);
+    color: white;
+}}
+.main .block-container {{ padding-top: 2rem; }}
+.aya-card {{
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 1px solid rgba(255,255,255,0.2);
+    margin: 1rem 0;
+}}
+.stButton > button {{
+    background: white !important;
+    color: {AYA_DARK} !important;
+    border-radius: 25px !important;
+    font-weight: bold !important;
+    border: none !important;
+    padding: 1rem 2rem !important;
+}}
+h1 {{ color: white !important; font-size: 3.5rem !important; text-align: center; }}
+h2 {{ color: #f0f8ff !important; text-align: center; }}
+</style>
+""", unsafe_allow_html=True)
+
+# Flights Simulation (Real SerpAPI ready [file:23])
+@st.cache_data
+def find_flights(origin, dest, outbound, adults):
+    flights = [
+        {"airline": "Ryanair", "time": f"{origin} 07:00 → {dest} 09:30", "price": 72, "link": "https://ryanair.com"},
+        {"airline": "Wizz Air", "time": f"{origin} 06:15 → {dest} 08:45", "price": 89, "link": "https://wizzair.com"},
+        {"airline": "Air Serbia", "time": f"{origin} 05:00 → {dest} 09:10 (1 stop)", "price": 132, "link": "https://airserbia.com"}
+    ]
+    return pd.DataFrame(flights)
+
+# Hotels Simulation (Real SerpAPI ready [file:21])
+@st.cache_data
+def find_hotels(dest, adults):
+    hotels = [
+        {"name": "Pulitzer Amsterdam ⭐4.8", "price": 285, "link": "https://pulitzeramsterdam.com"},
+        {"name": "Conservatorium ⭐4.9", "price": 412, "link": "https://conservatoriumhotel.com"},
+        {"name": "Jaz in The City ⭐4.5", "price": 144, "link": "https://jazhotels.com"}
+    ]
+    return pd.DataFrame(hotels)
+
+# AYA TravelBook PDF [file:65]
+def create_aya_pdf(name, dest, total, flights, hotels, nights):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_fill_color(0, 180, 219)
+    pdf.rect(0, 0, 210, 40, 'F')
+    pdf.set_font('Arial', 'B', 20)
+    pdf.set_text_color(255, 255, 255)
+    pdf.cell(0, 15, 'AYA AI TRAVEL BOOK V4', 0, 1, 'C')
+    
+    pdf.ln(20)
+    pdf.set_font('Arial', 'B', 16)
+    pdf.set_text_color(0, 0, 0)
+    pdf.cell(0, 10, f'👤 {name}', 0, 1, 'C')
+    pdf.cell(0, 10, f'✈️ {dest}', 0, 1, 'C')
+    pdf.cell(0, 10, f'💰 €{total:.0f}', 0, 1, 'C')
+    
+    pdf.ln(10
