@@ -130,3 +130,68 @@ with st.container():
             st.markdown("### 🏨 Хотели (Google Hotels)")
             for _, h in hotels.iterrows():
                 st.success(f"**{h['name']}** ⭐4.8 | **€{h['price']}/нощ**")
+                st.markdown(f"[🏛️ Официален сайт]({h['link']})")
+            
+            st.markdown(f"### 💰 **Обща цена: €{total:.0f}**")
+            st.markdown(f"*✨ {nights} нощувки + полети + такси*")
+            
+            # PAYMENT + EMAIL SIMULATION
+            col_pay, col_actions = st.columns([2, 1])
+            
+            with col_pay:
+                if st.button("💳 ПЛАТИ СЕЙЧАС", use_container_width=True):
+                    with st.spinner("🤖 LangGraph + SendGrid изпращане..."):
+                        
+                        # SIMULATION EMAIL TO БИЛЯНА
+                        email_content = f"""
+🔔 НОВ КЛИЕНТ! ПЛАТИ €{total:.0f}!
+
+👤 {client_name or 'Test User'}
+✈️ {origin} → {dest} | {adults} възрастни
+📅 {outbound.strftime('%d.%m.%Y')} - {return_date.strftime('%d.%m.%Y')}
+
+💰 Ryanair €72 + Pulitzer €285 x{nights} = €{total:.0f}
+✅ Stripe Checkout успешен!
+
+📋 ЗАКАЗАНО:
+• Полети: Ryanair/Wizz Air
+• Хотел: Pulitzer Amsterdam ⭐4.8
+• Такси + трансфери
+
+✅ Биляна - Manual резервация!
+📞 +359 894 84 28 82
+                        """
+                        
+                        st.success("✅ **РЕЗЕРВАЦИЯТА Е ИЗПРАТЕНА!** 🎉")
+                        st.balloons()
+                        
+                        st.markdown("### 📧 **Биляна получи този имейл:**")
+                        st.code(email_content, language="markdown")
+                        
+                        # WhatsApp Биляна
+                        wa_msg = urllib.parse.quote(f"🔔 НОВ КЛИЕНТ! {client_name} €{total} {origin}→{dest}")
+                        st.markdown(f"""
+                        <a href="https://wa.me/{WHATSAPP_PHONE}?text={wa_msg}" target="_blank">
+                            <button style="width:100%; background:#25D366; color:white;">📲 Извести Биляна</button>
+                        </a>
+                        """, unsafe_allow_html=True)
+            
+            with col_actions:
+                # PDF Download
+                if client_name:
+                    pdf_data = create_aya_pdf(client_name, f"{origin}→{dest}", total)
+                    b64_pdf = base64.b64encode(pdf_data).decode()
+                    st.markdown(f'''
+                    <a href="data:application/pdf;base64,{b64_pdf}" download="AYA_{dest}_{int(total)}.pdf">
+                        <button style="width:100%; background:#d4af37; color:black;">📥 TravelBook PDF</button>
+                    </a>
+                    ''', unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# Footer
+st.markdown(f"""
+<div style='text-align: center; padding: 2rem; color: rgba(255,255,255,0.8);'>
+    <p>✨ AYA AI Travel Studio | {CONTACT_NAME} | +359 894 84 28 82 | <a href="https://wa.me/{WHATSAPP_PHONE}" style="color:#25D366;">WhatsApp</a></p>
+</div>
+""", unsafe_allow_html=True)
