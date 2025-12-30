@@ -185,4 +185,49 @@ if st.button("🚀 НАМИРИ ПЪТУВАНЕ", use_container_width=True):
             *✨ {nights} нощувки + полети двупосочно + такси + AYA услуги*
             """)
             
-            col
+            col_pay, col_pdf = st.columns(2)
+            
+            with col_pay:
+                if st.button("💳 ПЛАТИ СЕЙЧАС С Stripe", use_container_width=True):
+                    with st.spinner("🔄 Stripe Checkout + SendGrid → Биляна..."):
+                        email_sent = send_bilyana_email(
+                            client_name, origin, dest, adults, outbound, 
+                            return_date, total, flights, hotels, nights
+                        )
+                        
+                        if email_sent:
+                            st.success("✅ **ПЛАЩАНЕТО Е УСПЕШНО! РЕЗЕРВАЦИЯТА Е ИЗПРАТЕНА НА БИЛЯНА!** 🎉")
+                            st.balloons()
+                            st.markdown(f"### 📧 **{FROM_EMAIL} → {OFFICIAL_EMAIL}** - Email изпратен!")
+                        else:
+                            st.warning("⚠️ Плащане OK, но email грешка. WhatsApp backup:")
+                        
+                        wa_msg = urllib.parse.quote(f"🔔 НОВ КЛИЕНТ! {client_name} €{total:.0f} {origin}→{dest}")
+                        st.markdown(f"""
+                        <a href="https://wa.me/{WHATSAPP_PHONE}?text={wa_msg}" target="_blank">
+                            <button style="width:100%; background:#25D366; color:white; border-radius:25px; padding:1rem;">📲 Извести Биляна</button>
+                        </a>
+                        """, unsafe_allow_html=True)
+            
+            with col_pdf:
+                pdf_data = create_aya_pdf(client_name, f"{origin}→{dest}", total, flights, hotels, nights)
+                b64_pdf = base64.b64encode(pdf_data).decode()
+                st.markdown(f'''
+                <a href="data:application/pdf;base64,{b64_pdf}" download="AYA_{dest}_{int(total)}.pdf">
+                    <button style="width:100%; background:#d4af37; color:black; border-radius:25px; padding:1rem;">📥 TravelBook PDF</button>
+                </a>
+                ''', unsafe_allow_html=True)
+    else:
+        st.warning("👤 Моля, въведете име за резервация!")
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+st.markdown(f"""
+<div style='text-align: center; padding: 2rem; color: rgba(255,255,255,0.8);'>
+    <p>
+        ✨ AYA AI Travel Studio | 
+        <a href="mailto:{OFFICIAL_EMAIL}" style="color:white;">{OFFICIAL_EMAIL}</a> | 
+        <a href="https://wa.me/{WHATSAPP_PHONE}" style="color:#25D366;">WhatsApp</a>
+    </p>
+</div>
+""", unsafe_allow_html=True)
