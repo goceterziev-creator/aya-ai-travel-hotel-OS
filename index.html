@@ -13,74 +13,267 @@
       --gray: #636e72; --light: #f8f9fa; --shadow: 0 10px 30px rgba(0,0,0,0.1);
       --radius: 16px; --transition: all 0.3s ease;
     }
-    body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); color: var(--dark); line-height: 1.6; overflow-x: hidden; }
+    body { 
+      font-family: 'Segoe UI', sans-serif; 
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: var(--dark); line-height: 1.6; overflow-x: hidden;
+    }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-    header { position: fixed; top: 0; width: 100%; padding: 20px 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); box-shadow: 0 5px 20px rgba(0,0,0,0.05); z-index: 1000; }
+    
+    /* Header */
+    header { 
+      position: fixed; top: 0; width: 100%; padding: 20px 0; 
+      background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.05); z-index: 1000;
+    }
     nav { display: flex; justify-content: space-between; align-items: center; }
-    .logo { font-size: 1.8rem; font-weight: 800; color: var(--gold); text-decoration: none; display: flex; align-items: center; gap: 10px; }
-    .logo-icon { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); width: 40px; height: 40px; border-radius: 10px; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-    .hero { padding: 180px 0 120px; }
-    .hero h1 { font-size: 3.5rem; background: linear-gradient(135deg, var(--gold), var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 20px; font-weight: 800; }
-    .hub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; margin-top: 40px; }
-    .hub-card { background: white; border-radius: var(--radius); padding: 40px; box-shadow: var(--shadow); transition: var(--transition); border: 1px solid #f0f0f0; }
-    .hub-card:hover { transform: translateY(-10px); }
-    .btn { display: inline-block; padding: 14px 32px; border-radius: 50px; font-weight: 600; text-decoration: none; transition: var(--transition); }
-    .btn-gold { background: var(--gold); color: white; }
+    .logo { 
+      font-size: 1.8rem; font-weight: 800; color: var(--gold); 
+      text-decoration: none; display: flex; align-items: center; gap: 10px;
+    }
+    .logo-icon { 
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark)); 
+      width: 40px; height: 40px; border-radius: 10px; color: white; 
+      display: flex; align-items: center; justify-content: center; font-weight: bold;
+    }
+    
+    /* Hero */
+    .hero { padding: 180px 0 120px; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); }
+    .hero-content { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .hero h1 { 
+      font-size: 3.5rem; background: linear-gradient(135deg, var(--gold), var(--primary)); 
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; 
+      margin-bottom: 20px; font-weight: 800;
+    }
+    .hero p { font-size: 1.2rem; color: var(--gray); margin-bottom: 30px; }
+    .btn { 
+      display: inline-block; padding: 14px 32px; border-radius: 50px; 
+      font-weight: 600; text-decoration: none; cursor: pointer; 
+      transition: var(--transition); border: none; font-size: 1rem;
+    }
+    .btn-gold { 
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark)); 
+      color: #1a1a1a; box-shadow: 0 5px 20px rgba(212,175,55,0.4);
+    }
+    .btn-gold:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(212,175,55,0.5); }
     .btn-primary { background: var(--primary); color: white; }
-    .nav-links a { margin-left: 20px; text-decoration: none; color: var(--dark); font-weight: 500; }
+    
+    /* AYA Hub Cards - ГЛАВНАТА СЕКЦИЯ! */
+    .hub-section { padding: 100px 0; }
+    .hub-grid { 
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); 
+      gap: 30px; margin-top: 60px;
+    }
+    .hub-card { 
+      background: white; border-radius: var(--radius); padding: 40px; 
+      box-shadow: var(--shadow); transition: var(--transition); 
+      border: 1px solid #f0f0f0; position: relative; overflow: hidden;
+    }
+    .hub-card::before { 
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; 
+      background: linear-gradient(90deg, var(--gold), var(--primary));
+    }
+    .hub-card:hover { 
+      transform: translateY(-10px); box-shadow: 0 25px 50px rgba(0,0,0,0.15); 
+    }
+    .card-icon { font-size: 56px; margin-bottom: 20px; display: block; }
+    .hub-card h3 { color: var(--dark); margin-bottom: 16px; font-size: 1.8rem; }
+    .hub-card p { color: var(--gray); margin-bottom: 28px; line-height: 1.7; }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero-content { grid-template-columns: 1fr; text-align: center; }
+      .hero h1 { font-size: 2.5rem; }
+      .hub-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <div class="container">
-      <nav>
-        <a href="#" class="logo"><div class="logo-icon">AYA</div><span>AYA Hub</span></a>
-        <div class="nav-links">
-          <a href="#hub">Hub</a>
-          <a href="#demo">Demo</a>
+<!-- Header -->
+<header>
+  <div class="container">
+    <nav>
+      <a href="#" class="logo">
+        <div class="logo-icon">AYA</div>
+        <span>AYA Hub</span>
+      </a>
+      <div class="nav-links">
+        <a href="#hub">Hub</a>
+        <a href="#demo">Demo</a>
+        <a href="#contact">Контакт</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1>AYA OS – AI Travel & Booking Hub</h1>
+        <p>
+          Един централен Hub за AI маршрути, живи хотелски цени и смарт консиерж за хотели. 
+          Всичко брандирано като AYA.
+        </p>
+        <div class="hero-buttons">
+          <a href="#hub" class="btn btn-gold">
+            <i class="fas fa-layer-group" style="margin-right:8px;"></i> Отвори AYA Hub
+          </a>
         </div>
-      </nav>
-    </div>
-  </header>
-
-  <section class="hero">
-    <div class="container">
-      <h1>AYA OS – AI Travel & Booking Hub</h1>
-      <p>Централен Hub за AI маршрути и живи хотелски резервации.</p>
-    </div>
-  </section>
-
-  <section class="container" id="hub">
-    <div class="hub-grid">
-      <div class="hub-card">
-        <h3>AYA AI Travel Studio</h3>
-        <p>AI маршрути и PDF планове.</p>
-        <a href="https://planify-pro-copy-a1246f0a.base44.app/" target="_blank" class="btn btn-gold">Отвори Studio →</a>
       </div>
-
-      <div class="hub-card">
-        <h3>AYA Booking Engine</h3>
-        <p>Живи хотелски цени и резервации (LiteAPI).</p>
-        <a href="https://aya-hotel-booking-copy-49843754.base44.app/" target="_blank" class="btn btn-primary">Отвори Booking Engine →</a>
-      </div>
-
-      <div class="hub-card">
-        <h3>AYA Smart Hotel</h3>
-        <p>AI консиерж за хотели (Скоро).</p>
-        <a href="#" class="btn btn-primary">Coming Soon</a>
+      <div class="hero-visual">
+        <!-- Прост визуален dashboard / може да остане празен -->
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <script>
-    // Smooth scroll само за вътрешни линкове
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) target.scrollIntoView({ behavior: 'smooth' });
+<!-- AYA Hub – трите модула -->
+<section class="hub-section" id="hub">
+  <div class="container">
+    <h2 style="font-size:2.4rem; margin-bottom:10px;">AYA Hub модули</h2>
+    <p style="color:#636e72; max-width:720px;">
+      Три свързани приложения: AI Studio за маршрути, Booking Engine с LiteAPI и Smart Hotel за консиерж.
+    </p>
+
+    <div class="<div class="hub-grid">
+  <!-- 1) AYA AI Travel Studio ✅ -->
+  <div class="hub-card aya-studio">
+    <span class="card-icon">✈️</span>
+    <h3>AYA AI Travel Studio</h3>
+    <p>AI маршрути, PDF планове, полети, хотели и активности</p>
+    <a href="https://planify-pro-copy-a1246f0a.base44.app/" target="_blank" class="btn btn-gold">
+      Отвори Studio →
+    </a>
+  </div>
+
+  <!-- 2) AYA Booking Engine ✅ LIVE! -->
+  <div class="hub-card aya-booking">
+    <span class="card-icon">🏨</span>
+    <h3>AYA Booking Engine</h3>
+    <p>Live hotel rates, rooms, instant booking + payment</p>
+    <a href="https://aya-hotel-booking-copy-49843754.base44.app/" target="_blank" class="btn btn-primary">
+      Отвори Booking Engine →
+    </a>
+  </div>
+
+  <!-- 3) AYA Smart Hotel ⏳ -->
+  <div class="hub-card aya-smart">
+    <span class="card-icon">🤖</span>
+    <h3>AYA Smart Hotel</h3>
+    <p>AI консиерж за хотели: чат за гости, заявки, upsell оферти</p>
+    <a href="#contact" class="btn btn-primary">
+      Станете пилотен хотел →
+    </a>
+  </div>
+</div>
+
+<!-- Demo Section -->
+<section class="demo" id="demo" style="padding: 100px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+  <div class="container">
+    <div style="text-align: center; margin-bottom: 60px;">
+      <h2 style="font-size: 2.8rem; margin-bottom: 20px;">Live Demo</h2>
+      <p style="max-width: 600px; margin: 0 auto; opacity: 0.9;">
+        Тествай AI търсене за пътувания директно тук.
+      </p>
+    </div>
+    
+    <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); padding: 40px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2);">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+        <div>
+          <h3 style="margin-bottom: 20px; font-size: 1.6rem;">Търси маршрут</h3>
+          <input type="text" placeholder="София → Дубай, 7 дни, 4* хотели" 
+                 style="width: 100%; padding: 15px; border-radius: 10px; border: none; font-size: 1rem; margin-bottom: 15px;">
+          <button class="btn" style="background: #00b894; color: white; width: 100%;">
+            <i class="fas fa-search"></i> Генерирай план
+          </button>
+        </div>
+        <div>
+          <h3 style="margin-bottom: 20px; font-size: 1.6rem;">Бързо търсене</h3>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="https://planify-pro-copy-a1246f0a.base44.app/" target="_blank" 
+               class="btn" style="background: var(--gold); color: #1a1a1a; padding: 12px 20px; font-size: 0.9rem;">AI Studio</a>
+            <a href="#" id="quickBooking" target="_blank" 
+               class="btn" style="background: #00b894; color: white; padding: 12px 20px; font-size: 0.9rem;">Хотели София</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer style="background: var(--dark); color: white; padding: 60px 0 20px;">
+  <div class="container">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-bottom: 40px;">
+      <div>
+        <a href="#" style="font-size: 1.8rem; font-weight: 800; color: var(--gold); text-decoration: none;">
+          <div class="logo-icon" style="display: inline-block; margin-right: 10px; font-size: 1.2rem;">AYA</div>
+          Hub
+        </a>
+        <p style="margin-top: 15px; opacity: 0.8; line-height: 1.6;">
+          AI Travel OS за хотели, агенции и директни bookings. 
+          Интеграция с LiteAPI + Base44.
+        </p>
+      </div>
+      <div>
+        <h4 style="margin-bottom: 20px;">Модули</h4>
+        <ul style="list-style: none;">
+          <li><a href="#hub" style="color: #b2bec3; text-decoration: none;">AYA AI Studio</a></li>
+          <li><a href="#" style="color: #b2bec3; text-decoration: none;">Booking Engine</a></li>
+          <li><a href="#" style="color: #b2bec3; text-decoration: none;">Smart Hotel</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="margin-bottom: 20px;">Контакт</h4>
+        <p style="opacity: 0.8;"><i class="fas fa-envelope" style="color: var(--gold); margin-right: 8px;"></i> hello@aya-hub.com</p>
+        <p style="opacity: 0.8;"><i class="fas fa-phone" style="color: var(--gold); margin-right: 8px;"></i> +359 89 484 2882</p>
+      </div>
+    </div>
+    <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; text-align: center; opacity: 0.7;">
+      <p>&copy; 2025 AYA Hub. Powered by Base44 + LiteAPI.</p>
+    </div>
+  </div>
+</footer>
+
+<!-- JavaScript -->
+<script>
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // Booking Engine линк (замени с твоя Base44 линк)
+  document.addEventListener('DOMContentLoaded', function() {
+    const bookingLinks = document.querySelectorAll('#ayaBookingLink, #quickBooking');
+    bookingLinks.forEach(link => {
+      link.href = 'https://YOUR-BASE44-BOOKING-ENGINE.base44.app/';
+      link.addEventListener('click', function(e) {
+        if (this.href === '#') {
+          e.preventDefault();
+          alert('Booking Engine се прави в Base44 – казвай "Booking Engine" и започваме!');
+        }
       });
     });
-  </script>
+
+    // Auto-scroll към Hub
+    if (window.location.hash === '#hub') {
+      document.querySelector('#hub').scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  // Mobile menu (ако добавиш burger)
+  function toggleMobileMenu() {
+    const navLinks = document.querySelector('.nav-links');
+    navLinks.classList.toggle('active');
+  }
+</script>
 </body>
 </html>
